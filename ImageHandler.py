@@ -517,7 +517,7 @@ class ImageChanger():
         self.__lastList = self.__sampleImageList
         e = 0
         g = 0
-        for frame in self.__sampleImageList:
+        for frame in self.__sampleImageList:  #https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
             e = e + 1
             drawing = np.zeros((frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
             contours, _ = cv.findContours(frame, type1, type2)                   
