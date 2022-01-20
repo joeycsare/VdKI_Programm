@@ -84,11 +84,11 @@ class ImageLoader():
     def AllData(self):
         return self.__Data
 
-    def AddColumns(self, Column = []):
+    def AddColumns(self, Column=[]):
         j = 0
         for entry in self.__Data:
             entry.update(Column[j])
-            entry = dict(sorted(entry.items(), key = lambda kv: kv[0]))
+            entry = dict(sorted(entry.items(), key=lambda kv: kv[0]))
             j += 1
 
     def DeleteColumn(self, Key):
@@ -97,21 +97,21 @@ class ImageLoader():
                 entry.pop(Key)
             except:
                 print("no pop")
-            entry = dict(sorted(entry.items(), key = lambda kv: kv[0]))
+            entry = dict(sorted(entry.items(), key=lambda kv: kv[0]))
 
-    def AddRow(self, Row = {}):
+    def AddRow(self, Row={}):
         self.__Data.append(Row)
 
-    def DeleteRow(self, RowNumber = 0):
+    def DeleteRow(self, RowNumber=0):
         self.__Data.pop(RowNumber)
 
-    def AddColumnsToSample(self, Column = []):
+    def AddColumnsToSample(self, Column=[]):
         j = 0
         for entry in self.__sampleEntrys:
             if j >= len(Column):
-                j -=1
+                j -= 1
             entry.update(Column[j])
-            entry = dict(sorted(entry.items(), key = lambda kv: kv[0]))
+            entry = dict(sorted(entry.items(), key=lambda kv: kv[0]))
             j += 1
 
     def DeleteColumnFromSample(self, Key):
@@ -120,12 +120,12 @@ class ImageLoader():
                 entry.pop(Key)
             except:
                 print("no pop")
-            entry = dict(sorted(entry.items(), key = lambda kv: kv[0]))
+            entry = dict(sorted(entry.items(), key=lambda kv: kv[0]))
 
-    def AddRowToSample(self, Row = {}):
+    def AddRowToSample(self, Row={}):
         self.__sampleEntrys.append(Row)
 
-    def DeleteRowFromSample(self, RowNumber = 0):
+    def DeleteRowFromSample(self, RowNumber=0):
         self.__sampleEntrys.pop(RowNumber)
 
     def PrintSamplesToCSV(self):
@@ -139,7 +139,6 @@ class ImageLoader():
                     line.append(str(entry.get(key)))
                 csvwriter.writerow(line)
         print('-------------CSV Done------------')
-            
 
     @property
     def sampleEntrys(self):
@@ -197,7 +196,8 @@ class ImageChanger():
                     self.__contureValues.append({})
                     self.__calculatedValues.append({})
                 except Exception as f:
-                    self.__errorList.append('ERROR: Readin ' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Readin ' + str(e) + '---------------')
                     print(repr(f))
             self.holdtime = holdtime
             if wait:
@@ -217,7 +217,7 @@ class ImageChanger():
         a = random.randint(0, len(self.__sampleImageList)-1)
         cv.imshow('Random Image', self.__sampleImageList[a])
         cv.waitKey(100 * self.holdtime)
-    
+
     def GetRandomImage(self):
         a = random.randint(0, len(self.__sampleImageList)-1)
         return self.__sampleImageList[a]
@@ -235,14 +235,14 @@ class ImageChanger():
         cv.imshow('Index Image', self.__sampleImageList[index])
         cv.waitKey(100 * self.holdtime)
 
-    def ShowImage(self, frame, kk = 0):
+    def ShowImage(self, frame, kk=0):
         cv.imshow('Frame Image', frame)
         cv.waitKey(kk * 100)
 
     def ShowImageLoop(self):
         a = 0
         while a < len(self.__sampleImageList):
-            cv.imshow('Index Image loop '+ str(a), self.__sampleImageList[a])
+            cv.imshow('Index Image loop ' + str(a), self.__sampleImageList[a])
             a = a+1
             cv.waitKey(100 * self.holdtime)
 
@@ -259,7 +259,8 @@ class ImageChanger():
                 img = cv.resize(frame, dimensions, interpolation=interpol)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: FrameByScale ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: FrameByScale ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def FrameByWidth(self, targetwidth=500, interpol=cv.INTER_AREA):
@@ -276,7 +277,8 @@ class ImageChanger():
                 img = cv.resize(frame, dimensions, interpolation=interpol)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: FrameByWidth ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: FrameByWidth ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def FrameByHeight(self, targetheight=500, interpol=cv.INTER_AREA):
@@ -293,7 +295,8 @@ class ImageChanger():
                 img = cv.resize(frame, dimensions, interpolation=interpol)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: FrameByHeight ' +str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: FrameByHeight ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def FrameByValues(self, targetwidth, targetheight, interpol=cv.INTER_AREA):
@@ -307,7 +310,8 @@ class ImageChanger():
                     frame, (targetwidth, targetheight), interpolation=interpol)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: FrameByValues ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: FrameByValues ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def Blur(self, grainsize=3):
@@ -321,7 +325,8 @@ class ImageChanger():
                     frame, (grainsize, grainsize), cv.BORDER_DEFAULT)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: Blur ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: Blur ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def Dilation(self, kernelsize=5, iterate=1):
@@ -335,7 +340,8 @@ class ImageChanger():
                                 iterations=iterate)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: Dilate ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: Dilate ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def Cropping(self, y1=50, x1=50, y2=450, x2=450):
@@ -348,7 +354,8 @@ class ImageChanger():
                 img = frame[x1:y1, x2:y2]
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: Cropping ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: Cropping ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def Erode(self, kernelsize=3, iterate=1):
@@ -362,7 +369,8 @@ class ImageChanger():
                                iterations=iterate)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: Erode ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: Erode ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def Gray(self):
@@ -375,7 +383,8 @@ class ImageChanger():
                 img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: Gray ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: Gray ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def HSV(self):
@@ -388,20 +397,22 @@ class ImageChanger():
                 img = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: HSV ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: HSV ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def ColorspaceCorrection(self, transformSpace =cv.COLOR_BGR2LAB, undoSpace =cv.COLOR_LAB2BGR,  Limit=3.0, GridSize=8, applyTo = 0, showPrewiev = False):
+    def ColorspaceCorrection(self, transformSpace=cv.COLOR_BGR2LAB, undoSpace=cv.COLOR_LAB2BGR,  Limit=3.0, GridSize=8, applyTo=0, showPrewiev=False):
         retList = []
         e = 0
         self.__lastList = self.__sampleImageList
         for frame in self.__sampleImageList:
             e = e + 1
             try:
-                lab= cv.cvtColor(frame, transformSpace)
-                a,b,c = cv.split(lab)
-                liste = [a,b,c]
-                clahe = cv.createCLAHE(clipLimit = Limit, tileGridSize = (GridSize,GridSize))
+                lab = cv.cvtColor(frame, transformSpace)
+                a, b, c = cv.split(lab)
+                liste = [a, b, c]
+                clahe = cv.createCLAHE(
+                    clipLimit=Limit, tileGridSize=(GridSize, GridSize))
                 liste[applyTo] = clahe.apply(liste[applyTo])
                 limg = cv.merge(liste)
                 final = cv.cvtColor(limg, undoSpace)
@@ -415,7 +426,8 @@ class ImageChanger():
                     cv.waitKey(300 * self.holdtime)
                 retList.append(final)
             except Exception as f:
-                self.__errorList.append('ERROR: ColorspaceCorrection ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: ColorspaceCorrection ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def HLS(self):
@@ -428,7 +440,8 @@ class ImageChanger():
                 img = cv.cvtColor(frame, cv.COLOR_BGR2HLS)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: HLS ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: HLS ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
     def LAB(self):
@@ -441,90 +454,187 @@ class ImageChanger():
                 img = cv.cvtColor(frame, cv.COLOR_BGR2LAB)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: LAB ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: LAB ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def Canny(self, track = False,tres1=125, tres2=175):
+    def Normieren(self):
         retList = []
         e = 0
         self.__lastList = self.__sampleImageList
-        if track:
-            try:
-                cv.namedWindow('Threshold Tracking')
-                cv.createTrackbar('threshold_1', 'Threshold Tracking', 0, 255,self.__nothing)
-                cv.createTrackbar('threshold_2', 'Threshold Tracking', 0, 255,self.__nothing)
-                while True:
-                    tres1 = cv.getTrackbarPos('threshold_1', 'Threshold Tracking')
-                    tres2 = cv.getTrackbarPos('threshold_2', 'Threshold Tracking')
-                    img = cv.Canny(self.__sampleImageList[0], tres1, tres2)
-                    cv.imshow('Threshold Preview',img)
-                    waitKEY = cv.waitKey(1)
-                    if waitKEY == 27:
-                        print('new Values -------------------------------------- ')
-                        print('threshold1 -- ', tres1)
-                        print('threshold2 -- ', tres2)
-                        print('------------------------------------------------- ')
-                        break
-            except Exception as f:
-                self.__errorList.append('ERROR: CannyPreview ' + str(e) + '--------------- ' + repr(f))
         for frame in self.__sampleImageList:
             e = e + 1
             try:
-                img = cv.Canny(frame, tres1, tres2)
+                img = cv.normalize(frame, None, 0, 255, cv.NORM_MINMAX)
                 retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: Canny ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: Normiert ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def ThresholdDual(self, track = False, tresh=127, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
+    def BilateralFilter(self, sigCol=100, sigSpc=100):
         retList = []
         e = 0
         self.__lastList = self.__sampleImageList
-        if track:
+        for frame in self.__sampleImageList:
+            e = e + 1
             try:
-                cv.namedWindow('Threshold Tracking')
-                cv.createTrackbar('threshold', 'Threshold Tracking', 0, 255,self.__nothing)
-                while True:
-                    tresh = cv.getTrackbarPos('threshold', 'Threshold Tracking')
-                    T1 = cv.threshold(self.__sampleImageList[0], tresh, 255, type1, type2)
-                    if invert:
-                        T1 = cv.threshold(self.__sampleImageList[0], T1[0], 255,cv.THRESH_BINARY_INV)
-                    cv.imshow('Threshold Preview -- close with x',T1[1])
-                    waitKEY = cv.waitKey(1)
-                    if waitKEY == 27:
-                        print('new Values -------------------------------------- ')
-                        print('threshold -- ', tresh)
-                        print('------------------------------------------------- ')
-                        break
+                img = cv.bilateralFilter(frame, 9, sigCol, sigSpc)
+                retList.append(img)
             except Exception as f:
-                self.__errorList.append('ERROR: ThresholdDual ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: Normiert ' + str(e) + '--------------- ' + repr(f))
+        self.__sampleImageList = retList
+
+    def CannyNorm(self, track=False, tres1=125, tres2=175):
+        retList = []
+        e = 0
+        self.__lastList = self.__sampleImageList
+        for frame in self.__sampleImageList:
+            e = e + 1
+            try:
+                img = cv.Canny(frame, tres1, tres2, L2gradient=True)
+                retList.append(img)
+            except Exception as f:
+                self.__errorList.append(
+                    'ERROR: Canny ' + str(e) + '--------------- ' + repr(f))
+        self.__sampleImageList = retList
+
+    def CannyTest(self, tres1=0, tres2=0):
+        retList = []
+        e = 0
+        self.__lastList = self.__sampleImageList
+        try:
+            cv.namedWindow('Threshold Tracking')
+            cv.createTrackbar(
+                'threshold_1', 'Threshold Tracking', 0, 255, self.__nothing)
+            cv.createTrackbar(
+                'threshold_2', 'Threshold Tracking', 0, 255, self.__nothing)
+            while True:
+                tres1 = cv.getTrackbarPos('threshold_1', 'Threshold Tracking')
+                tres2 = cv.getTrackbarPos('threshold_2', 'Threshold Tracking')
+                img = cv.Canny(
+                    self.__sampleImageList[0], tres1, tres2, L2gradient=True)
+                cv.imshow('Threshold Preview', img)
+                waitKEY = cv.waitKey(1)
+                if waitKEY == 27:
+                    print('new Values -------------------------------------- ')
+                    print('threshold1 -- ', tres1)
+                    print('threshold2 -- ', tres2)
+                    print('------------------------------------------------- ')
+                    break
+        except Exception as f:
+            self.__errorList.append(
+                'ERROR: CannyPreview ' + str(e) + '--------------- ' + repr(f))
+
+    def AdaptiveCanny(self, sigma=0.8, contLenght=10, edge=3):
+        retList = []
+        e = 0
+        self.__lastList = self.__sampleImageList
+        for frame in self.__sampleImageList:
+            e = e + 1
+            try:
+                contas = []
+                wide = 0
+                while len(contas) < contLenght:
+                    m = np.median(frame)  # Medianwert
+                    # lower threshold (Grenze)
+                    lower = wide + int(max(0, (1.0 - sigma) * m))
+                    # upper threshold (Grenze)
+                    upper = wide + int(min(255, (1.0 + sigma) * m))
+                    # OpenCV, die de Kante sucht
+                    img = cv.Canny(frame, lower, upper,edges=edge ,L2gradient=True)
+                    contas, hier = cv.findContours(
+                        img, cv.RETR_CCOMP, cv.CHAIN_APPROX_TC89_L1)
+                    wide -= 5
+                retList.append(img)
+            except Exception as f:
+                self.__errorList.append(
+                    'ERROR: Canny ' + str(e) + '--------------- ' + repr(f))
+        self.__sampleImageList = retList
+
+    def Threshold(self, track=False, tresh=127, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
+        retList = []
+        e = 0
+        self.__lastList = self.__sampleImageList
         for frame in self.__sampleImageList:
             e = e + 1
             try:
                 T1 = cv.threshold(frame, tresh, 255, type1, type2)
                 if invert:
-                    T1 = cv.threshold(frame, T1[0], 255,cv.THRESH_BINARY_INV)
+                    T1 = cv.threshold(frame, T1[0], 255, cv.THRESH_BINARY_INV)
                 retList.append(T1[1])
             except Exception as f:
-                self.__errorList.append('ERROR: ThresholdDual ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append(
+                    'ERROR: ThresholdDual ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def __nothing(self,x):
+    def ThresholdTest(self,tresh=0, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
+        retList = []
+        e = 0
+        self.__lastList = self.__sampleImageList
+        try:
+            cv.namedWindow('Threshold Tracking')
+            cv.createTrackbar(
+                'threshold', 'Threshold Tracking', 0, 255, self.__nothing)
+            while True:
+                tresh = cv.getTrackbarPos(
+                    'threshold', 'Threshold Tracking')
+                T1 = cv.threshold(self.__sampleImageList[0], tresh, 255, type1, type2)
+                if invert:
+                    T1 = cv.threshold(self.__sampleImageList[0], T1[0], 255, cv.THRESH_BINARY_INV)
+                cv.imshow('Threshold Preview -- close with x', T1[1])
+                waitKEY = cv.waitKey(1)
+                if waitKEY == 27:
+                    print('new Values -------------------------------------- ')
+                    print('threshold -- ', tresh)
+                    print('------------------------------------------------- ')
+                    break
+        except Exception as f:
+            self.__errorList.append(
+                'ERROR: ThresholdTest ' + str(e) + '--------------- ' + repr(f))
+
+    def ThresholdDualAdapt(self, contLenght=5,type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
+        retList = []
+        e = 0
+        self.__lastList = self.__sampleImageList
+        for frame in self.__sampleImageList:
+            e = e + 1
+            try:
+                contas = []
+                wide = 0
+                while (len(contas) < contLenght):# & (wide < 255):
+                    img = cv.threshold(frame, wide, 255, type1, type2)
+                    contas, hier = cv.findContours(img[1], cv.RETR_CCOMP, cv.CHAIN_APPROX_TC89_L1)
+                    cv.imshow('test',img[1])
+                    cv.waitKey(1000)
+                    wide += 5
+                retList.append(frame)
+            except Exception as f:
+                self.__errorList.append('ERROR: Threshold adapt ' + str(e) + '--------------- ' + repr(f))
+        self.__sampleImageList = retList
+
+    def __nothing(self, x):
         pass
 
-    def Contures(self, depth = 1,keyFunktion=cv.contourArea, type1=cv.RETR_EXTERNAL, type2=cv.CHAIN_APPROX_NONE, epsyValue=0.1, printing = False):
+    def Contures(self, deepness=1, type1=cv.RETR_EXTERNAL, type2=cv.CHAIN_APPROX_NONE, epsyValue=0.1, printing=False):
         retList = []
         self.__lastList = self.__sampleImageList
         e = 0
         g = 0
-        for frame in self.__sampleImageList:  #https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
+        for frame in self.__sampleImageList:  # https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
             e = e + 1
-            drawing = np.zeros((frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
-            contours, _ = cv.findContours(frame, type1, type2)                   
-            sorted_contours = sorted(contours, key = keyFunktion,reverse=False)
+            drawing = np.zeros(
+                (frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
+            contours, _ = cv.findContours(frame, type1, type2)
+            l = []
+            for c in contours:
+               l.append(cv.convexHull(c)) 
+            sorted_contours = sorted(contours, key=cv.contourArea, reverse=False)
             print('conturanzahl = ', len(contours))
+            depth = deepness
             if depth == 0:
-                depth = len(contours)     
+                depth = len(contours)
             while depth > 0:
                 try:
                     # if printing:
@@ -532,13 +642,14 @@ class ImageChanger():
                     #     for conts in sorted_contours:
                     #         carea = cv.contourArea(conts)
                     #         areas.append(carea)
-                        
+
                     #     print(areas)
-                    
+
                     cnt = sorted_contours[len(contours)-depth]
-                
+
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Making cnt_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Making cnt_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
 
                 try:
@@ -549,7 +660,8 @@ class ImageChanger():
                     cy = int(M['m01']/M['m00'])
 
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Making Centroid_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Centroid_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
 
                 try:
@@ -557,15 +669,16 @@ class ImageChanger():
                     # Perimeter and Area !!!!!!!!!!
                     perimeter = cv.arcLength(cnt, True)
                     area = cv.contourArea(cnt)
-                    approxConture = cv.approxPolyDP(cnt,epsyValue*cv.arcLength(cnt,True),True)
+                    approxConture = cv.approxPolyDP(cnt, epsyValue*cv.arcLength(cnt, True), True)
                     approxContureLenght = cv.arcLength(approxConture, True)
                     approxContureArea = cv.contourArea(approxConture)
                     hull = cv.convexHull(cnt)
                     convexHullArea = cv.contourArea(hull)
-                    convexHullLenght = cv.arcLength(hull,closed=True)
+                    convexHullLenght = cv.arcLength(hull, closed=True)
 
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Making Area and Perimeter_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Area and Perimeter_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
 
                 try:
@@ -579,11 +692,13 @@ class ImageChanger():
                     my = int(minRect[len(minRect)-depth][0][1])
 
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Making Rectangles_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Rectangles_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
 
                 try:
-                    cv.drawContours(drawing, sorted_contours, len(sorted_contours)-depth, (255, 255, 255))  # Contour
+                    cv.drawContours(drawing, sorted_contours, len(
+                        sorted_contours)-depth, (255, 255, 255))  # Contour
 
                     box = cv.boxPoints(minRect[len(minRect)-depth])
                     box = np.intp(box)
@@ -594,26 +709,34 @@ class ImageChanger():
                     # Schwerpunkt(rot) der Fläche der Kontur
                     cv.circle(drawing, (cx, cy), 3, (255, 0, 0))
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Making Drawing_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Drawing_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
 
                 try:
                     stein = np.sqrt(((mx-cx)**2)+((my-cy)**2))
                     boxLenght, boxWidth = minRect[len(minRect)-depth][1]
-                    ratio = max(minRect[len(minRect)-depth][1]) / min(minRect[len(minRect)-depth][1])
+                    ratio = max(minRect[len(minRect)-depth][1]) / \
+                        min(minRect[len(minRect)-depth][1])
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Calculating Values_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Calculating Values_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
 
                 try:
-                    keyValues = [perimeter, boxLenght,boxWidth, stein, ratio,area,approxContureLenght, approxContureArea,convexHullArea,convexHullLenght]
-                    keyNames = ['perimeter', 'boxLenght','boxWidth', 'stein', 'ratio','area','approxContureLenght', 'approxContureArea','convexHullArea','convexHullLenght']
+                    keyValues = [perimeter, stein, ratio, area,
+                                 approxContureLenght, approxContureArea, 
+                                 convexHullArea, convexHullLenght]
+                    keyNames = ['perimeter', 'stein', 'ratio', 'area',
+                                'approxContureLenght', 'approxContureArea', 
+                                'convexHullArea', 'convexHullLenght']
                     dic = {}
                     for k in range(len(keyNames)):
                         l = keyNames[k] + '_' + str(depth)
                         dic[l] = keyValues[k]
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Making Dictionary_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Dictionary_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
 
                     # keyValues = [convexHullLenght/perimeter, boxLenght,boxWidth,]
@@ -625,13 +748,14 @@ class ImageChanger():
 
                 try:
                     self.__contureValues[g].update(dic)
-                    self.__contureValues[g] = dict(sorted(self.__contureValues[g].items(), key = lambda kv: kv[0]))
-                    
+                    self.__contureValues[g] = dict(
+                        sorted(self.__contureValues[g].items(), key=lambda kv: kv[0]))
 
                 except Exception as f:
-                    self.__errorList.append('ERROR: Conture_Adding Values to Main_' + str(depth) + '_' + str(e) + '---------------')
+                    self.__errorList.append(
+                        'ERROR: Conture_Adding Values to Main_' + str(depth) + '_' + str(e) + '---------------')
                     print(repr(f))
-                depth -=1
+                depth -= 1
             g += 1
             retList.append(drawing)
         self.__sampleImageList = retList
@@ -645,7 +769,8 @@ class ImageChanger():
                     print(key, '---', str(entry.get(key)))
                 print('...........................')
             except Exception as f:
-                self.__errorList.append('ERROR: PrintConture ' + str(e) + '---------------')
+                self.__errorList.append(
+                    'ERROR: PrintConture ' + str(e) + '---------------')
                 print(repr(f))
 
     def PrintCalculatedValues(self):
@@ -657,10 +782,11 @@ class ImageChanger():
                     print(key, '---', str(entry.get(key)))
                 print('...........................')
             except Exception as f:
-                self.__errorList.append('ERROR: PrintCalculated ' + str(e) + '---------------')
+                self.__errorList.append(
+                    'ERROR: PrintCalculated ' + str(e) + '---------------')
                 print(repr(f))
 
-    def PrintErrors(self,all = False):
+    def PrintErrors(self, all=False):
         print('Total Number of Errors = ' + str(len(self.__errorList)))
         if all:
             try:
