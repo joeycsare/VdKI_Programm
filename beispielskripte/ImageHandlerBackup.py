@@ -3,7 +3,6 @@ import random
 import csv
 import cv2 as cv
 import numpy as np
-import math
 
 
 class ImageLoader():
@@ -97,7 +96,7 @@ class ImageLoader():
             try:
                 entry.pop(Key)
             except:
-                print(Key, " is not a key in this Column")
+                print("no pop")
             entry = dict(sorted(entry.items(), key=lambda kv: kv[0]))
 
     def AddRow(self, Row={}):
@@ -105,18 +104,6 @@ class ImageLoader():
 
     def DeleteRow(self, RowNumber=0):
         self.__Data.pop(RowNumber)
-
-    def PrintAllToCSV(self, fileName = 'allCSV'):
-        with open(fileName, 'w', encoding='UTF8', newline='') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            keyList = sorted(self.__Data[0].keys())
-            csvwriter.writerow(keyList)
-            for entry in self.__Data:
-                line = []
-                for key in keyList:
-                    line.append(str(entry.get(key)))
-                csvwriter.writerow(line)
-        print('-------------All CSV Done------------')
 
     def AddColumnsToSample(self, Column=[]):
         j = 0
@@ -132,7 +119,7 @@ class ImageLoader():
             try:
                 entry.pop(Key)
             except:
-                print(Key, " is not a key in this Column")
+                print("no pop")
             entry = dict(sorted(entry.items(), key=lambda kv: kv[0]))
 
     def AddRowToSample(self, Row={}):
@@ -141,8 +128,8 @@ class ImageLoader():
     def DeleteRowFromSample(self, RowNumber=0):
         self.__sampleEntrys.pop(RowNumber)
 
-    def PrintSamplesToCSV(self, fileName = 'sampleCSV'):
-        with open(fileName, 'w', encoding='UTF8', newline='') as csvfile:
+    def PrintSamplesToCSV(self):
+        with open('output.csv', 'w', encoding='UTF8', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
             keyList = sorted(self.__sampleEntrys[0].keys())
             csvwriter.writerow(keyList)
@@ -151,7 +138,7 @@ class ImageLoader():
                 for key in keyList:
                     line.append(str(entry.get(key)))
                 csvwriter.writerow(line)
-        print('-------------Sample CSV Done------------')
+        print('-------------CSV Done------------')
 
     @property
     def sampleEntrys(self):
@@ -177,11 +164,10 @@ class ImageLoader():
 class ImageChanger():
 
     __sampleImageList = []
-    __sampleTypeList = []
     __originalList = []
     __lastList = []
     __contureValues = []
-    __colorList = []
+    __calculatedValues = []
     __errorList = []
 
     @property
@@ -207,7 +193,8 @@ class ImageChanger():
                     self.__sampleImageList.append(cv.imread(sam))
                     self.__originalList.append(cv.imread(sam))
                     self.__lastList.append(cv.imread(sam))
-                    self.__sampleTypeList.append(os.path.dirname(sam))
+                    self.__contureValues.append({})
+                    self.__calculatedValues.append({})
                 except Exception as f:
                     self.__errorList.append(
                         'ERROR: Readin ' + str(e) + '---------------')
@@ -275,7 +262,6 @@ class ImageChanger():
                 self.__errorList.append(
                     'ERROR: FrameByScale ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
-        self.__colorList = retList
 
     def FrameByWidth(self, targetwidth=500, interpol=cv.INTER_AREA):
         retList = []
@@ -294,7 +280,6 @@ class ImageChanger():
                 self.__errorList.append(
                     'ERROR: FrameByWidth ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
-        self.__colorList = retList
 
     def FrameByHeight(self, targetheight=500, interpol=cv.INTER_AREA):
         retList = []
@@ -313,7 +298,6 @@ class ImageChanger():
                 self.__errorList.append(
                     'ERROR: FrameByHeight ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
-        self.__colorList = retList
 
     def FrameByValues(self, targetwidth, targetheight, interpol=cv.INTER_AREA):
         retList = []
@@ -329,7 +313,6 @@ class ImageChanger():
                 self.__errorList.append(
                     'ERROR: FrameByValues ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
-        self.__colorList = retList
 
     def Blur(self, grainsize=3):
         retList = []
@@ -353,9 +336,7 @@ class ImageChanger():
         for frame in self.__sampleImageList:
             e = e + 1
             try:
-                kernel = cv.getStructuringElement(
-                    cv.MORPH_ELLIPSE, (kernelsize, kernelsize))
-                img = cv.dilate(frame, kernel,
+                img = cv.dilate(frame, (kernelsize, kernelsize),
                                 iterations=iterate)
                 retList.append(img)
             except Exception as f:
@@ -377,33 +358,6 @@ class ImageChanger():
                     'ERROR: Cropping ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def Bordering(self, bordersize=10, color=0):
-        retList = []
-        e = 0
-        self.__lastList = self.__sampleImageList
-        for frame in self.__sampleImageList:
-            e = e + 1
-            try:
-                img = cv.copyMakeBorder(
-                    frame, bordersize, bordersize, bordersize, bordersize, cv.BORDER_CONSTANT, value=color)
-                retList.append(img)
-            except Exception as f:
-                self.__errorList.append(
-                    'ERROR: Bordering ' + str(e) + '--------------- ' + repr(f))
-        self.__sampleImageList = retList
-        retList = []
-        e = 0
-        for frame in self.__colorList:
-            e = e + 1
-            try:
-                img = cv.copyMakeBorder(
-                    frame, bordersize, bordersize, bordersize, bordersize, cv.BORDER_CONSTANT, value=250)
-                retList.append(img)
-            except Exception as f:
-                self.__errorList.append(
-                    'ERROR: Bordering color ' + str(e) + '--------------- ' + repr(f))
-        self.__colorList = retList
-
     def Erode(self, kernelsize=3, iterate=1):
         retList = []
         e = 0
@@ -411,9 +365,7 @@ class ImageChanger():
         for frame in self.__sampleImageList:
             e = e + 1
             try:
-                kernel = cv.getStructuringElement(
-                    cv.MORPH_ELLIPSE, (kernelsize, kernelsize))
-                img = cv.erode(frame, kernel,
+                img = cv.erode(frame, (kernelsize, kernelsize),
                                iterations=iterate)
                 retList.append(img)
             except Exception as f:
@@ -459,8 +411,7 @@ class ImageChanger():
                 lab = cv.cvtColor(frame, transformSpace)
                 a, b, c = cv.split(lab)
                 liste = [a, b, c]
-                clahe = cv.createCLAHE(
-                    clipLimit=Limit, tileGridSize=(GridSize, GridSize))
+                clahe = cv.createCLAHE(clipLimit=Limit, tileGridSize=(GridSize, GridSize))
                 liste[applyTo] = clahe.apply(liste[applyTo])
                 limg = cv.merge(liste)
                 final = cv.cvtColor(limg, undoSpace)
@@ -480,7 +431,7 @@ class ImageChanger():
                     'ERROR: ColorspaceCorrection ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def ColorspaceToColor(self, targetColor=0, showPrewiev=False):
+    def ColorspaceToColor(self, targetColor = 0, showPrewiev=False):
         retList = []
         e = 0
         for frame in self.__sampleImageList:
@@ -488,8 +439,7 @@ class ImageChanger():
             try:
                 lab = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
                 a, b, c = cv.split(lab)
-                anew = np.zeros(
-                    (frame.shape[0], frame.shape[1], 1), dtype=np.uint8)+targetColor
+                anew = np.zeros((frame.shape[0], frame.shape[1], 1), dtype=np.uint8)+targetColor
                 limg = cv.merge((anew, b, c))
                 final = cv.cvtColor(limg, cv.COLOR_HSV2BGR)
                 if e == 1 & showPrewiev:
@@ -503,8 +453,7 @@ class ImageChanger():
                     cv.waitKey(300 * self.holdtime)
                 retList.append(final)
             except Exception as f:
-                self.__errorList.append(
-                    'ERROR: ColorspaceCorrection ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append('ERROR: ColorspaceCorrection ' + str(e) + '--------------- ' + repr(f))
 
     def HLS(self):
         retList = []
@@ -562,15 +511,14 @@ class ImageChanger():
                     'ERROR: Normiert ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def CannyNorm(self, edge=3, tres1=125, tres2=175):
+    def CannyNorm(self, track=False, tres1=125, tres2=175):
         retList = []
         e = 0
         self.__lastList = self.__sampleImageList
         for frame in self.__sampleImageList:
             e = e + 1
             try:
-                img = cv.Canny(frame, tres1, tres2,
-                               edges=edge, L2gradient=True)
+                img = cv.Canny(frame, tres1, tres2, L2gradient=True)
                 retList.append(img)
             except Exception as f:
                 self.__errorList.append(
@@ -613,17 +561,17 @@ class ImageChanger():
             try:
                 contas = []
                 wide = 0
-                while len(contas) > contLenght:
+                while len(contas) < contLenght:
+                    m = np.median(frame)  # Medianwert
                     # lower threshold (Grenze)
-                    lower = wide + int(max(50, (1.0 - sigma) * 170))
+                    lower = wide + int(max(0, (1.0 - sigma) * m))
                     # upper threshold (Grenze)
-                    upper = wide + int(min(255, (1.0 + sigma) * 127))
+                    upper = wide + int(min(255, (1.0 + sigma) * m))
                     # OpenCV, die de Kante sucht
-                    img = cv.Canny(frame, lower, upper,
-                                   edges=edge, L2gradient=True)
+                    img = cv.Canny(frame, lower, upper,edges=edge ,L2gradient=True)
                     contas, hier = cv.findContours(
                         img, cv.RETR_CCOMP, cv.CHAIN_APPROX_TC89_L1)
-                    wide += 5
+                    wide -= 5
                 retList.append(img)
             except Exception as f:
                 self.__errorList.append(
@@ -646,7 +594,7 @@ class ImageChanger():
                     'ERROR: ThresholdDual ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def ThresholdTest(self, tresh=0, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
+    def ThresholdTest(self,tresh=0, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
         retList = []
         e = 0
         self.__lastList = self.__sampleImageList
@@ -657,11 +605,9 @@ class ImageChanger():
             while True:
                 tresh = cv.getTrackbarPos(
                     'threshold', 'Threshold Tracking')
-                T1 = cv.threshold(
-                    self.__sampleImageList[0], tresh, 255, type1, type2)
+                T1 = cv.threshold(self.__sampleImageList[0], tresh, 255, type1, type2)
                 if invert:
-                    T1 = cv.threshold(
-                        self.__sampleImageList[0], T1[0], 255, cv.THRESH_BINARY_INV)
+                    T1 = cv.threshold(self.__sampleImageList[0], T1[0], 255, cv.THRESH_BINARY_INV)
                 cv.imshow('Threshold Preview -- close with x', T1[1])
                 waitKEY = cv.waitKey(1)
                 if waitKEY == 27:
@@ -673,7 +619,7 @@ class ImageChanger():
             self.__errorList.append(
                 'ERROR: ThresholdTest ' + str(e) + '--------------- ' + repr(f))
 
-    def ThresholdDualAdapt(self, contLenght=5, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
+    def ThresholdDualAdapt(self, contLenght=5,type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU, invert=True):
         retList = []
         e = 0
         self.__lastList = self.__sampleImageList
@@ -682,20 +628,200 @@ class ImageChanger():
             try:
                 contas = []
                 wide = 0
-                while (len(contas) < contLenght):  # & (wide < 255):
+                while (len(contas) < contLenght):# & (wide < 255):
                     img = cv.threshold(frame, wide, 255, type1, type2)
-                    contas, hier = cv.findContours(
-                        img[1], cv.RETR_CCOMP, cv.CHAIN_APPROX_TC89_L1)
-                    cv.imshow('test', img[1])
+                    contas, hier = cv.findContours(img[1], cv.RETR_CCOMP, cv.CHAIN_APPROX_TC89_L1)
+                    cv.imshow('test',img[1])
                     cv.waitKey(1000)
                     wide += 5
                 retList.append(frame)
             except Exception as f:
-                self.__errorList.append(
-                    'ERROR: Threshold adapt ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append('ERROR: Threshold adapt ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def ColorMerkmale(self, showPrewiev=False, sigma=0.9, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU):
+    def __nothing(self, x):
+        pass
+
+    def Contures(self, deepness=1, type1=cv.RETR_EXTERNAL, type2=cv.CHAIN_APPROX_NONE, epsyValue=0.1, printing=False):
+        retList = []
+        self.__lastList = self.__sampleImageList
+        e = 0
+        g = 0
+        for frame in self.__sampleImageList:  # https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
+            e = e + 1
+            drawing = np.zeros(
+                (frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
+            contours, _ = cv.findContours(frame, type1, type2)
+            l = []
+            for c in contours:
+               l.append(cv.convexHull(c)) 
+            sorted_contours = sorted(contours, key=cv.contourArea, reverse=False)
+            print('conturanzahl = ', len(contours))
+            depth = deepness
+            if depth == 0:
+                depth = len(contours)
+            while depth > 0:
+                try:
+                    # if printing:
+                    #     areas = []
+                    #     for conts in sorted_contours:
+                    #         carea = cv.contourArea(conts)
+                    #         areas.append(carea)
+
+                    #     print(areas)
+
+                    cnt = sorted_contours[len(contours)-depth]
+
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Making cnt_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+
+                try:
+
+                    # Centroid!!!!!!!!!!!!!
+                    M = cv.moments(cnt)
+                    cx = int(M['m10']/M['m00'])
+                    cy = int(M['m01']/M['m00'])
+
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Centroid_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+
+                try:
+
+                    # Perimeter and Area !!!!!!!!!!
+                    perimeter = cv.arcLength(cnt, True)
+                    area = cv.contourArea(cnt)
+                    approxConture = cv.approxPolyDP(cnt, epsyValue*cv.arcLength(cnt, True), True)
+                    approxContureLenght = cv.arcLength(approxConture, True)
+                    approxContureArea = cv.contourArea(approxConture)
+                    hull = cv.convexHull(cnt)
+                    convexHullArea = cv.contourArea(hull)
+                    convexHullLenght = cv.arcLength(hull, closed=True)
+
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Area and Perimeter_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+
+                try:
+
+                    # Find the rotated rectangles
+                    minRect = [None]*len(sorted_contours)  # Contour !!!!!!!!!!
+                    for j, c in enumerate(sorted_contours):
+                        minRect[j] = cv.minAreaRect(c)
+
+                    mx = int(minRect[len(minRect)-depth][0][0])
+                    my = int(minRect[len(minRect)-depth][0][1])
+
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Rectangles_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+
+                try:
+                    cv.drawContours(drawing, sorted_contours, len(
+                        sorted_contours)-depth, (255, 255, 255))  # Contour
+
+                    box = cv.boxPoints(minRect[len(minRect)-depth])
+                    box = np.intp(box)
+                    # Box(lila)
+                    cv.drawContours(drawing, [box], 0, (255, 0, 255))
+                    # Mittelpunkt(grün) der Box
+                    cv.circle(drawing, (mx, my), 3, (0, 255, 0))
+                    # Schwerpunkt(rot) der Fläche der Kontur
+                    cv.circle(drawing, (cx, cy), 3, (255, 0, 0))
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Drawing_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+
+                try:
+                    stein = np.sqrt(((mx-cx)**2)+((my-cy)**2))
+                    boxLenght, boxWidth = minRect[len(minRect)-depth][1]
+                    ratio = max(minRect[len(minRect)-depth][1]) / \
+                        min(minRect[len(minRect)-depth][1])
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Calculating Values_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+
+                try:
+                    keyValues = [perimeter, stein, ratio, area,
+                                 approxContureLenght, approxContureArea, 
+                                 convexHullArea, convexHullLenght]
+                    keyNames = ['perimeter', 'stein', 'ratio', 'area',
+                                'approxContureLenght', 'approxContureArea', 
+                                'convexHullArea', 'convexHullLenght']
+                    dic = {}
+                    for k in range(len(keyNames)):
+                        l = keyNames[k] + '_' + str(depth)
+                        dic[l] = keyValues[k]
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Making Dictionary_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+
+                    # keyValues = [convexHullLenght/perimeter, boxLenght,boxWidth,]
+                    # keyNames = ['denting', 'convexness','']
+                    # calcdic = {}
+                    # for k in range(len(keyNames)):
+                    #     l = keyNames[k] + '_' + str(depth)
+                    #     dic[l] = keyValues[k]
+
+                try:
+                    self.__contureValues[g].update(dic)
+                    self.__contureValues[g] = dict(
+                        sorted(self.__contureValues[g].items(), key=lambda kv: kv[0]))
+
+                except Exception as f:
+                    self.__errorList.append(
+                        'ERROR: Conture_Adding Values to Main_' + str(depth) + '_' + str(e) + '---------------')
+                    print(repr(f))
+                depth -= 1
+            g += 1
+            retList.append(drawing)
+        self.__sampleImageList = retList
+
+    def PrintContureValues(self):
+        e = 0
+        for entry in self.__contureValues:
+            e = e + 1
+            try:
+                for key in entry:
+                    print(key, '---', str(entry.get(key)))
+                print('...........................')
+            except Exception as f:
+                self.__errorList.append(
+                    'ERROR: PrintConture ' + str(e) + '---------------')
+                print(repr(f))
+
+    def PrintCalculatedValues(self):
+        e = 0
+        for entry in self.__contureValues:
+            e = e + 1
+            try:
+                for key in entry:
+                    print(key, '---', str(entry.get(key)))
+                print('...........................')
+            except Exception as f:
+                self.__errorList.append(
+                    'ERROR: PrintCalculated ' + str(e) + '---------------')
+                print(repr(f))
+
+    def PrintErrors(self, all=False):
+        print('Total Number of Errors = ' + str(len(self.__errorList)))
+        if all:
+            try:
+                for entry in self.__errorList:
+                    print(entry)
+            except Exception as f:
+                print('Errorlist not printable')
+                print(repr(f))
+
+    def ColorMerkmale(self, showPrewiev=False,sigma=0.9, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU):
         retList = []
         e = 0
         for frame in self.__sampleImageList:
@@ -707,19 +833,17 @@ class ImageChanger():
                 # farbe normalisieren für durchschnitt
                 # neue farbe mit threshold absolut machen
 
-                holz = np.zeros(
-                    (hsv.shape[0], hsv.shape[1], 1), dtype=np.uint8)
-                rows, cols = hue.shape  # holziness
+                holz = np.zeros((hsv.shape[0], hsv.shape[1], 1), dtype=np.uint8)
+                rows,cols = hue.shape # holziness
                 for i in range(rows):
                     for j in range(cols):
-                        h, s, v = hsv[i, j]
+                        h,s,v = hsv[i,j]
                         if h < 70 | h > 220 & s > 50:
-                            holz[i, j] = 250
+                            holz[i,j] = 250
 
-                bright = cv.bitwise_not(bright)  # brightness invertieren
-                # brightness auf sättigung addieren
-                bright2 = cv.add(bright, sat)
-                # threshold anpassen für beides
+                bright = cv.bitwise_not(bright) # brightness invertieren
+                bright2 = cv.add(bright, sat) # brightness auf sättigung addieren
+                # threshold anpassen für beides                
 
                 m = np.average(bright2)  # Medianwert
                 lower = sigma * m
@@ -734,13 +858,12 @@ class ImageChanger():
                     cv.imshow('Holz', holz)
                     cv.waitKey(300 * self.holdtime)
                 retList.append(bright2)
-
+                
             except Exception as f:
-                self.__errorList.append(
-                    'ERROR: ColorspaceCorrection ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append('ERROR: ColorspaceCorrection ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
 
-    def BrightTresh(self, showPrewiev=False, sigma=0.9, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU):
+    def BrightTresh(self, showPrewiev=False,sigma=0.9, type1=cv.THRESH_BINARY, type2=cv.THRESH_OTSU):
         retList = []
         e = 0
         for frame in self.__sampleImageList:
@@ -751,278 +874,5 @@ class ImageChanger():
                 T1 = cv.threshold(frame, border, 255, type1, type2)
                 retList.append(T1[1])
             except Exception as f:
-                self.__errorList.append(
-                    'ERROR: BrightTresh ' + str(e) + '--------------- ' + repr(f))
+                self.__errorList.append('ERROR: BrightTresh ' + str(e) + '--------------- ' + repr(f))
         self.__sampleImageList = retList
-
-    def __nothing(self, x):
-        pass
-
-    def __sortFunc(self, x):
-        a = cv.contourArea(cv.convexHull(x))
-        return a
-
-    def Contures(self, type1=cv.RETR_EXTERNAL, type2=cv.CHAIN_APPROX_NONE, epsyValue=0.01, printing=False):
-        retList = []
-        self.__lastList = self.__sampleImageList
-        e = 0
-        g = 0
-        for frame in self.__sampleImageList:  # https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
-            # if True:
-            try:
-                e = e + 1
-                drawing = np.zeros((frame.shape[0], frame.shape[1], 3), dtype=np.uint8)
-                contours, _ = cv.findContours(frame, type1, type2)
-
-                sorted_contours = sorted(contours, key=self.__sortFunc, reverse=False)
-
-                sortet_convex_contoures = []
-                sortet_convex_contoures_noReturn = []
-                sortet_approx_contoures = []
-                for c in sorted_contours:
-                    sortet_convex_contoures.append(cv.convexHull(c))
-                    sortet_convex_contoures_noReturn.append(cv.convexHull(c,returnPoints=False))
-                    sortet_approx_contoures.append(cv.approxPolyDP(c, epsyValue*cv.arcLength(c, True), True))
-
-                cnt = sorted_contours[len(sorted_contours)-1]
-                cnt_c = sortet_convex_contoures[len(sorted_contours)-1]
-                cnt_cnR = sortet_convex_contoures_noReturn[len(sorted_contours)-1]
-                cnt_a = sortet_approx_contoures[len(sorted_contours)-1]
-
-                cnt2 = sorted_contours[len(sorted_contours)-2]
-                cnt2_c = sortet_convex_contoures[len(sorted_contours)-2]
-                cnt2_a = sortet_approx_contoures[len(sorted_contours)-2]
-
-            # humoments
-                # huMoments = cv.HuMoments(cv.moments(cnt))
-
-                # for i in range(0,7):
-                #     huMoments[i] = -1* math.copysign(1.0, huMoments[i]) * math.log10(abs(huMoments[i]))
-
-                compareImage = np.zeros(frame.shape, dtype=np.uint8)
-                compareImage1 = cv.rectangle(compareImage, (150,100), (250,300), 255, -1)
-
-                compareImage = np.zeros(frame.shape, dtype=np.uint8)
-                compareImage2 = cv.circle(compareImage, (200,200), 50, 255, -1)
-                cntImage1, _ = cv.findContours(compareImage1, type1, type2)
-                cntImage2, _ = cv.findContours(compareImage2, type1, type2)
-
-                # cv.imshow('comp1: ', compareImage1)
-                # cv.imshow('comp2: ', compareImage2)
-
-                # mask
-                mask = np.zeros(frame.shape, np.uint8)
-                cv.drawContours(mask, [cnt], 0, 255, -1)
-
-                orb = cv.ORB_create()
-                keyPoints, description = orb.detectAndCompute(frame, None)
-
-
-            # First Conture data ------------------------------------------------------------------------------------------------------------
-                area = cv.contourArea(cnt)
-                perimeter = cv.arcLength(cnt, True)
-
-                area_c = cv.contourArea(cnt_c)
-                perimeter_c = cv.arcLength(cnt_c, True)
-
-                minCircle = cv.minEnclosingCircle(cnt)
-                (x,y),radius = minCircle
-                center = (int(x),int(y))
-                radius = int(radius)
-
-                mainMoment = cv.moments(cnt)
-                cx = int(mainMoment['m10']/mainMoment['m00'])
-                cy = int(mainMoment['m01']/mainMoment['m00'])
-
-                convexMoment = cv.moments(cnt_c)
-                cx_c = int(convexMoment['m10']/convexMoment['m00'])
-                cy_c = int(convexMoment['m01']/convexMoment['m00'])
-
-                minRect = cv.minAreaRect(cnt)
-                mx = int(minRect[0][0])
-                my = int(minRect[0][1])
-                mw = int(minRect[1][0])
-                mh = int(minRect[1][1])
-                mAn = int(minRect[2])
-
-            # First Conture Drawing ----------------
-                cv.drawContours(drawing, sorted_contours, len(sorted_contours)-1, (255, 255, 255))  # Contour
-                cv.drawContours(drawing, sortet_approx_contoures, len(sorted_contours)-1, (0, 255, 0))  # Approx Contour
-                cv.drawContours(drawing, sortet_convex_contoures, len(sorted_contours)-1, (255, 0, 0))  # Convex Contour
-
-                minbox = np.intp(cv.boxPoints(minRect))  # Box(lila)
-                
-                cv.drawContours(drawing, [minbox], 0, (255, 0, 255))
-                cv.circle(drawing,center,radius,(255, 255, 0), 2)
-                cv.circle(drawing, (mx, my), 3, (255, 0, 255))# Mittelpunkt(grün) der Box
-                cv.circle(drawing, center, 3, (255, 255, 0))# Mittelpunkt (türkis) des minimalen Kreises
-
-                cv.circle(drawing, (cx, cy), 3, (255, 255, 255))# Schwerpunkt(rot) der Fläche der Kontur
-                cv.circle(drawing, (cx_c, cy_c), 3, (255, 0, 0)) # Schwerpunkt(gelb) der Fläche der Convexen Kontur
-                
-            # Second Conture data -----------------------------------------------------------------------------------------------------------
-                area2 = cv.contourArea(cnt2)
-                perimeter2 = cv.arcLength(cnt2, True)
-
-                area2_c = cv.contourArea(cnt2_c)
-                perimeter2_c = cv.arcLength(cnt2_c, True)
-
-                minCircle2 = cv.minEnclosingCircle(cnt)
-                (x2,y2),radius2 = minCircle2
-                center2 = (int(x2),int(y2))
-                radius2 = int(radius2)
-
-                mainMoment2 = cv.moments(cnt2)
-                cx2 = int(mainMoment2['m10']/mainMoment2['m00'])
-                cy2 = int(mainMoment2['m01']/mainMoment2['m00'])
-
-                mainMoment2 = 0
-                cx2 = 0
-                cy2 = 0
-                
-                convexMoment2 = cv.moments(cnt2_c)
-                cx2_c = int(convexMoment2['m10']/convexMoment2['m00'])
-                cy2_c = int(convexMoment2['m01']/convexMoment2['m00'])
-                
-                convexMoment2 = 0
-                cx2_c = 0
-                cy2_c = 0
-
-                minRect2 = cv.minAreaRect(cnt2)
-                mx2 = int(minRect2[0][0])
-                my2 = int(minRect2[0][1])
-                mw2 = int(minRect2[1][0])
-                mh2 = int(minRect2[1][1])
-                mAn2 = int(minRect2[2])
-
-            # Second Conture Drawing ----------------
-                cv.drawContours(drawing, sorted_contours, len(sorted_contours)-2, (255, 255, 255))  # Contour
-                cv.drawContours(drawing, sortet_approx_contoures, len(sorted_contours)-2, (0, 255, 0))  # Approx Contour
-                cv.drawContours(drawing, sortet_convex_contoures, len(sorted_contours)-2, (255, 0, 0))  # Convex Contour
-
-                minbox2 = np.intp(cv.boxPoints(minRect2))  # Box(lila)
-                
-                cv.drawContours(drawing, [minbox2], 0, (255, 0, 255))
-                cv.circle(drawing,center2,radius2,(255, 255, 0), 2)
-                cv.circle(drawing, (mx2, my2), 3, (255, 0, 255))# Mittelpunkt(grün) der Box
-                cv.circle(drawing, center2, 3, (255, 255, 0))# Mittelpunkt (türkis) des minimalen Kreises
-
-                cv.circle(drawing, (cx2, cy2), 3, (255, 255, 255))# Schwerpunkt(rot) der Fläche der Kontur
-                cv.circle(drawing, (cx2_c, cy2_c), 3, (255, 0, 0)) # Schwerpunkt(gelb) der Fläche der Convexen Kontur
-                
-            # Merkmalsberechnung-------------------------------------------------------------------------------------------------------------
-
-            # conture 1 --------------
-                seradity = float(perimeter_c)/perimeter                                        # wie zerfurcht ist das objekt
-                solidity = float(area)/area_c                                                   # wie convex ist das objekt
-                
-                equi_diameter = np.sqrt(4*area/np.pi)                                           # durchmesser eines kreises mit gleicher fläche
-
-                minimal_ratio = max(minRect[1]) / min(minRect[1])                               # verhältnisse der seitenlängen
-
-                momentpointDistance = cv.pointPolygonTest(cnt, (cx, cy), True)                  # abstand des Schwerpunkts zur nächsten kante
-                middlepointDistance = cv.pointPolygonTest(cnt, (mx, my), True)/minimal_ratio    # normierter abstand des Mittelpunkts zur nächsten kante 
-
-                steiner = np.sqrt(((mx-cx)**2)+((my-cy)**2))                                    # abstand des Schwerpunkts zum Mittelpunkt
-
-                approxAnzahl = len(cnt_a)                                                       # Menge der nötigen Approximationssegmente
-
-            # conture 1 und 2 --------------
-                seradity2 = float(perimeter2_c)/perimeter2                                      # wie zerfurcht ist das die zweite kontur 
-                solidity2 = float(area2)/area2_c                                                # wie convex ist die zweite kontur         
-                
-                angle = abs(mAn-mAn2)                                                           # Winkel zwischen den Boxen der beiden größten Conturen 
-                minimal_ratio2 = max(minRect2[1]) / min(minRect2[1])                            # verhältnisse der seitenlängen
-
-                areaRatio = area2/area                                                          # größenverhältnis der conturen
-
-                contureDistance = np.sqrt(((cx2_c-cx_c)**2)+((cy2_c-cy_c)**2))/max(minRect[1])  # Abstand der Mittelpunkte der beiden größten konturen im verhältnis zu gesamtlänge
-            
-            # Overall   --------------
-                
-                conturenAnzahl = len(contours)                                                  # wie viele conturen wurden gefunden
-                
-                rectangleLike = cv.matchShapes(cnt, cntImage1[0], cv.CONTOURS_MATCH_I2, 0)      # wie rectangular ist das bild
-                circleLike = cv.matchShapes(cnt, cntImage2[0], cv.CONTOURS_MATCH_I2, 0)         # wie circular ist das bild
-
-                keyPointsAnzahl = len(keyPoints)                                                #anzahl der gefundenen keypoints
-
-
-                mean_val,_,_,_ = cv.mean(frame, mask=mask)                                      # mean der Fläche in der kontur
-                # colorMap,_,_ = cv.split(cv.cvtColor(self.__colorList[g], cv.COLOR_BGR2HSV))
-                # mean_color,_,_,_ = cv.mean(colorMap,mask=mask)
-
-                farPoint = 0                                                                    # größte entfernung von der convexen kontur
-                try:                                                                            # fehleranfällig
-                    defects = cv.convexityDefects(cnt, cnt_cnR)
-                    farPoint = 0
-                    for i in range(defects.shape[0]):
-                        _, _, _, d = defects[i, 0]
-                        if d > farPoint:
-                            farPoint = d
-                except Exception as d:
-                    self.__errorList.append('ERROR: Farpoint ' + str(e) + '--------------- ' + repr(d))
-                    farPoint = 20000
-
-                objectType = os.path.basename(self.__sampleTypeList[g])
-
-                keyValues = [seradity, solidity, minimal_ratio, momentpointDistance, middlepointDistance, steiner, mean_val, approxAnzahl,
-                            solidity2,seradity2, angle, minimal_ratio2, areaRatio, contureDistance, conturenAnzahl
-                            #,rectangleLike,circleLike
-                            ,keyPointsAnzahl,farPoint, objectType]
-
-                keyNames = ['seradity', 'solidity', 'minimal_ratio', 'momentpointDistance', 'middlepointDistance', 'steiner', 'mean_val', 'approxAnzahl',
-                            'solidity2', 'seradity2', 'angle', 'minimal_ratio2', 'areaRatio', 'contureDistance','conturenAnzahl'
-                            #,'rectangleLike','circleLike'
-                            ,'keyPointsAnzahl','farPoint','type']
-
-                dic = {}
-                for k in range(len(keyNames)):
-                    l = keyNames[k]
-                    dic[l] = keyValues[k]
-
-                self.__contureValues.append(dic)
-                # print(dic)
-                # print(keyValues)
-                # self.__contureValues[g] = dict(sorted(self.__contureValues[g].items(), key=lambda kv: kv[0]))
-                retList.append(drawing)
-            except Exception as o:
-                self.__errorList.append('ERROR: conture ' + str(e) + '--------------- ' + repr(o.args))
-                print('jumped entry')
-        g += 1
-        self.__sampleImageList = retList
-
-    def PrintValues(self):
-        e = 0
-        for entry in self.__contureValues:
-            e = e + 1
-            try:
-                for key in entry:
-                    print(key, '---', str(entry.get(key)))
-                print('...........................')
-            except Exception as f:
-                self.__errorList.append(
-                    'ERROR: PrintConture ' + str(e) + '---------------')
-                print(repr(f))
-
-    def PrintValuesToCSV(self, fileName = 'sampleCSV'):
-        with open(fileName, 'w', encoding='UTF8', newline='') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            keyList = sorted(self.__contureValues[0].keys())
-            csvwriter.writerow(keyList)
-            for entry in self.__contureValues:
-                line = []
-                for key in keyList:
-                    line.append(str(entry.get(key)))
-                csvwriter.writerow(line)
-        print('-------------Values CSV Done------------')
-
-    def PrintErrors(self, all=False):
-        print('Total Number of Errors = ' + str(len(self.__errorList)))
-        if all:
-            try:
-                for entry in self.__errorList:
-                    print(entry)
-            except Exception as f:
-                print('Errorlist not printable')
-                print(repr(f))
