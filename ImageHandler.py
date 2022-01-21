@@ -936,7 +936,7 @@ class ImageChanger():
 
                 areaRatio = area2/area                                                          # größenverhältnis der conturen
 
-                contureDistance = np.sqrt(((cx2_c-cx_c)**2)+((cy2_c-cy_c)**2))/max(minRect[1])  # Abstand der Mittelpunkte der beiden größten konturen im verhältnis zu gesamtlänge
+                contureDistance = (np.sqrt(((cx2-cx)**2)+((cy2-cy)**2))/max(minRect[1]))  # Abstand der Mittelpunkte der beiden größten konturen im verhältnis zu gesamtlänge
             
             # Overall   --------------
                 
@@ -966,20 +966,27 @@ class ImageChanger():
 
                 objectType = os.path.basename(self.__sampleTypeList[g])
 
-                keyValues = [seradity, solidity, minimal_ratio, momentpointDistance, middlepointDistance, steiner, mean_val, approxAnzahl,
-                            solidity2,seradity2, angle, minimal_ratio2, areaRatio, contureDistance, conturenAnzahl
-                            #,rectangleLike,circleLike
-                            ,keyPointsAnzahl,farPoint, objectType]
-
-                keyNames = ['seradity', 'solidity', 'minimal_ratio', 'momentpointDistance', 'middlepointDistance', 'steiner', 'mean_val', 'approxAnzahl',
-                            'solidity2', 'seradity2', 'angle', 'minimal_ratio2', 'areaRatio', 'contureDistance','conturenAnzahl'
-                            #,'rectangleLike','circleLike'
-                            ,'keyPointsAnzahl','farPoint','type']
-
-                dic = {}
-                for k in range(len(keyNames)):
-                    l = keyNames[k]
-                    dic[l] = keyValues[k]
+                dic = {
+                     'seradity':seradity,
+                    'solidity':solidity,
+                    'minimal_ratio':minimal_ratio,
+                    # 'momentpointDistance':momentpointDistance,
+                    # 'middlepointDistance':middlepointDistance,
+                    'steiner':steiner,
+                    #  'mean_val':mean_val,
+                    'approxAnzahl':approxAnzahl,
+                    # 'solidity2':solidity2,
+                    # 'seradity2':seradity2,
+                    # 'angle':angle,
+                    #  'minimal_ratio2':minimal_ratio2,
+                    # 'areaRatio':areaRatio,
+                    'contureDistance':contureDistance,
+                    'conturenAnzahl':conturenAnzahl,
+                    #'rectangleLike':rectangleLike,
+                    #'circleLike':circleLike,
+                    'keyPointsAnzahl':keyPointsAnzahl,
+                    'farPoint':farPoint,
+                    'type':objectType }
 
                 self.__contureValues.append(dic)
                 # print(dic)
@@ -989,7 +996,7 @@ class ImageChanger():
             except Exception as o:
                 self.__errorList.append('ERROR: conture ' + str(e) + '--------------- ' + repr(o.args))
                 print('jumped entry')
-        g += 1
+            g += 1
         self.__sampleImageList = retList
 
     def PrintValues(self):
