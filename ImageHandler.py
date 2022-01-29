@@ -384,8 +384,11 @@ class ImageChanger():
         for frame in self.__sampleImageList:
             e = e + 1
             try:
-                img = cv.copyMakeBorder(
-                    frame, bordersize, bordersize, bordersize, bordersize, cv.BORDER_CONSTANT, value=color)
+                if frame[5][5] > 127:
+                    color = 255
+                else:
+                    color = 0
+                img = cv.copyMakeBorder(frame, bordersize, bordersize, bordersize, bordersize, cv.BORDER_CONSTANT, value=color)
                 retList.append(img)
             except Exception as f:
                 self.__errorList.append(
@@ -762,7 +765,7 @@ class ImageChanger():
         a = cv.contourArea(cv.convexHull(x))
         return a
 
-    def Contures(self, type1=cv.RETR_EXTERNAL, type2=cv.CHAIN_APPROX_NONE, epsyValue=0.01, printing=False):
+    def ConturMerkmale(self, type1=cv.RETR_EXTERNAL, type2=cv.CHAIN_APPROX_NONE, epsyValue=0.01, printing=False):
         retList = []
         self.__lastList = self.__sampleImageList
         e = 0
@@ -952,17 +955,15 @@ class ImageChanger():
                 # colorMap,_,_ = cv.split(cv.cvtColor(self.__colorList[g], cv.COLOR_BGR2HSV))
                 # mean_color,_,_,_ = cv.mean(colorMap,mask=mask)
 
-                farPoint = 0                                                                    # größte entfernung von der convexen kontur
-                try:                                                                            # fehleranfällig
-                    defects = cv.convexityDefects(cnt, cnt_cnR)
-                    farPoint = 0
+                farPoint = 0                                                                    # größte entfernung von der convexen kontur                                                                         # fehleranfällig
+                defects = cv.convexityDefects(cnt, cnt_cnR)
+                try:
                     for i in range(defects.shape[0]):
                         _, _, _, d = defects[i, 0]
                         if d > farPoint:
                             farPoint = d
-                except Exception as d:
-                    self.__errorList.append('ERROR: Farpoint ' + str(e) + '--------------- ' + repr(d))
-                    farPoint = 20000
+                except Exception as t:
+                    self.__errorList.append('ERROR: Farpoint 1 ' + str(e) + '--------------- ' + repr(t))
 
                 objectType = os.path.basename(self.__sampleTypeList[g])
 
@@ -970,20 +971,20 @@ class ImageChanger():
                      'seradity':seradity,
                     'solidity':solidity,
                     'minimal_ratio':minimal_ratio,
-                    # 'momentpointDistance':momentpointDistance,
-                    # 'middlepointDistance':middlepointDistance,
+                    'momentpointDistance':momentpointDistance,
+                    'middlepointDistance':middlepointDistance,
                     'steiner':steiner,
-                    #  'mean_val':mean_val,
+                    'mean_val':mean_val,
                     'approxAnzahl':approxAnzahl,
-                    # 'solidity2':solidity2,
-                    # 'seradity2':seradity2,
+                    'solidity2':solidity2,
+                    'seradity2':seradity2,
                     # 'angle':angle,
-                    #  'minimal_ratio2':minimal_ratio2,
-                    # 'areaRatio':areaRatio,
+                    'minimal_ratio2':minimal_ratio2,
+                    'areaRatio':areaRatio,
                     'contureDistance':contureDistance,
                     'conturenAnzahl':conturenAnzahl,
-                    #'rectangleLike':rectangleLike,
-                    #'circleLike':circleLike,
+                    'rectangleLike':rectangleLike,
+                    'circleLike':circleLike,
                     'keyPointsAnzahl':keyPointsAnzahl,
                     'farPoint':farPoint,
                     'type':objectType }
