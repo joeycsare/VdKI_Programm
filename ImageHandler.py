@@ -1213,23 +1213,23 @@ class Dectree():
             residual_tree = answer
             return self.classify_example(example, residual_tree)
 
-    def calculate_keynumbers(self, df, tree, label_name):
+    def calculate_keynumbers(self, df, tree):
 
         df["classification"] = df.apply(self.classify_example, axis=1, args=(tree,))
-        df["classification_correct"] = df["classification"] == df[label_name]
+        df["classification_correct"] = df["classification"] == df['label']
         overall_accuracy = df["classification_correct"].mean()
 
-        label_column = df[label_name]
+        label_column = df['label']
         unique_classes, _ = np.unique(label_column, return_counts=True)
         
         keynumbers = []
 
         for uc in unique_classes:
             
-            tp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == True)]
-            fp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == False)]
-            tn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == True)]
-            fn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == False)]
+            tp_df = df.loc[(df['label'] == uc) & (df["classification_correct"] == True)]
+            fp_df = df.loc[(df['label'] == uc) & (df["classification_correct"] == False)]
+            tn_df = df.loc[(df['label'] != uc) & (df["classification_correct"] == True)]
+            fn_df = df.loc[(df['label'] != uc) & (df["classification_correct"] == False)]
 
             true_positiv, _ = tp_df.shape
             false_positiv, _ = fp_df.shape
@@ -1259,7 +1259,7 @@ class Bayes():
         
         return train_df, test_df
 
-    def wahrscheinlichkeiten(self, df, label_column):
+    def wahrscheinlichkeiten(self, df,label_column):
         table = {}
 
         # determine values for the label
@@ -1308,23 +1308,23 @@ class Bayes():
         
         return prediction
 
-    def calculate_keynumbers(self, df, bayes_table, label_name):
+    def calculate_keynumbers(self, df, bayes_table):
 
         df["classification"] = df.apply(self.example, axis=1, args=(bayes_table,))
-        df["classification_correct"] = df["classification"] == df[label_name]
+        df["classification_correct"] = df["classification"] == df['label']
         overall_accuracy = df["classification_correct"].mean()
 
-        label_column = df[label_name]
+        label_column = df['label']
         unique_classes, _ = np.unique(label_column, return_counts=True)
             
         keynumbers = []
 
         for uc in unique_classes:
                 
-            tp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == True)]
-            fp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == False)]
-            tn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == True)]
-            fn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == False)]
+            tp_df = df.loc[(df['label'] == uc) & (df["classification_correct"] == True)]
+            fp_df = df.loc[(df['label'] == uc) & (df["classification_correct"] == False)]
+            tn_df = df.loc[(df['label'] != uc) & (df["classification_correct"] == True)]
+            fn_df = df.loc[(df['label'] != uc) & (df["classification_correct"] == False)]
 
             true_positiv, _ = tp_df.shape
             false_positiv, _ = fp_df.shape
