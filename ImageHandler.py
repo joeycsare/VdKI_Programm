@@ -1213,23 +1213,23 @@ class Dectree():
             residual_tree = answer
             return self.classify_example(example, residual_tree)
 
-    def calculate_keynumbers(self, df, tree):
+    def calculate_keynumbers(self, df, tree, label_name):
 
         df["classification"] = df.apply(self.classify_example, axis=1, args=(tree,))
-        df["classification_correct"] = df["classification"] == df["label"]
+        df["classification_correct"] = df["classification"] == df[label_name]
         overall_accuracy = df["classification_correct"].mean()
 
-        label_column = df["label"]
+        label_column = df[label_name]
         unique_classes, _ = np.unique(label_column, return_counts=True)
         
         keynumbers = []
 
         for uc in unique_classes:
             
-            tp_df = df.loc[(df["label"] == uc) & (df["classification_correct"] == True)]
-            fp_df = df.loc[(df["label"] == uc) & (df["classification_correct"] == False)]
-            tn_df = df.loc[(df["label"] != uc) & (df["classification_correct"] == True)]
-            fn_df = df.loc[(df["label"] != uc) & (df["classification_correct"] == False)]
+            tp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == True)]
+            fp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == False)]
+            tn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == True)]
+            fn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == False)]
 
             true_positiv, _ = tp_df.shape
             false_positiv, _ = fp_df.shape
@@ -1243,4 +1243,99 @@ class Dectree():
             keynumbers.append({"Label":uc, "recall":recall, "precision":precision, "f1score":f1score})
         
         
+        return overall_accuracy, keynumbers
+
+class Bayes():
+
+    def frame_split(self, df, test_size_in_percent):
+    
+        test_size = round(test_size_in_percent/100 * len(df))
+
+        indices = df.index.tolist()
+        test_indices = random.sample(population=indices, k=test_size)
+
+        test_df = df.loc[test_indices]
+        train_df = df.drop(test_indices)
+        
+        return train_df, test_df
+
+    def wahrscheinlichkeiten(self, df, label_column):
+        table = {}
+
+        # determine values for the label
+        value_counts = df[label_column].value_counts().sort_index()
+        table["class_names"] = value_counts.index.to_numpy()
+        table["class_counts"] = value_counts.values
+
+        # determine probabilities for the features
+        for feature in df.drop(label_column, axis=1).columns:
+            table[feature] = {}
+
+            # determine counts
+            counts = df.groupby(label_column)[feature].value_counts()
+            df_counts = counts.unstack(label_column)
+
+            # add one count to avoid "problem of rare values"
+            if df_counts.isna().any(axis=None):
+                df_counts.fillna(value=0, inplace=True)
+                df_counts += 1
+
+            # calculate probabilities
+            df_probabilities = df_counts / df_counts.sum()
+            for value in df_probabilities.index:
+                probabilities = df_probabilities.loc[value].to_numpy()
+                table[feature][value] = probabilities
+                
+        return table
+
+    def example(self, row,bayes_table):
+        
+        class_estimates = bayes_table["class_counts"]
+        for feature in row.index:
+
+            try:
+                value = row[feature]
+                probabilities = bayes_table[feature][value]
+                class_estimates = class_estimates * probabilities
+
+            # skip in case "value" only occurs in test set but not in train set
+            # (i.e. "value" is not in "lookup_table")
+            except KeyError:
+                continue
+
+        index_max_class = class_estimates.argmax()
+        prediction = bayes_table["class_names"][index_max_class]
+        
+        return prediction
+
+    def calculate_keynumbers(self, df, bayes_table, label_name):
+
+        df["classification"] = df.apply(self.example, axis=1, args=(bayes_table,))
+        df["classification_correct"] = df["classification"] == df[label_name]
+        overall_accuracy = df["classification_correct"].mean()
+
+        label_column = df[label_name]
+        unique_classes, _ = np.unique(label_column, return_counts=True)
+            
+        keynumbers = []
+
+        for uc in unique_classes:
+                
+            tp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == True)]
+            fp_df = df.loc[(df[label_name] == uc) & (df["classification_correct"] == False)]
+            tn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == True)]
+            fn_df = df.loc[(df[label_name] != uc) & (df["classification_correct"] == False)]
+
+            true_positiv, _ = tp_df.shape
+            false_positiv, _ = fp_df.shape
+            true_negative, _ = tn_df.shape
+            false_negative, _ = fn_df.shape
+
+            recall = true_positiv / (true_positiv+false_negative)
+            precision = true_positiv / (true_positiv+false_positiv)
+            f1score = 2 * (precision * recall) / (precision + recall)
+
+            keynumbers.append({"Label":uc, "recall":recall, "precision":precision, "f1score":f1score})
+            
+            
         return overall_accuracy, keynumbers
