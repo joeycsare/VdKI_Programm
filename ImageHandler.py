@@ -184,18 +184,6 @@ class ImageChanger():
     __colorList = []
     __errorList = []
 
-    @property
-    def sampleImageList(self):
-        return self.__sampleImageList
-
-    @property
-    def sampleLenght(self):
-        return len(self.__sampleImageList)
-
-    @property
-    def contureValues(self):
-        return self.__contureValues
-
     def __init__(self, sampleList=[], holdtime=20, wait=False) -> None:
         if len(sampleList) > 0:
             self.__sampleImageList = []
@@ -1050,7 +1038,18 @@ class ImageChanger():
             except Exception as f:
                 print('Errorlist not printable')
                 print(repr(f))
+    
+    @property
+    def sampleImageList(self):
+        return self.__sampleImageList
 
+    @property
+    def sampleLenght(self):
+        return len(self.__sampleImageList)
+
+    @property
+    def contureValues(self):
+        return self.__contureValues
 
 class Dectree():
 
