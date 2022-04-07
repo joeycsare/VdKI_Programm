@@ -714,18 +714,9 @@ class ImageChanger():
                 # farbe normalisieren für durchschnitt
                 # neue farbe mit threshold absolut machen
 
-                holz = np.zeros(
-                    (hsv.shape[0], hsv.shape[1], 1), dtype=np.uint8)
-                rows, cols = hue.shape  # holziness
-                for i in range(rows):
-                    for j in range(cols):
-                        h, s, v = hsv[i, j]
-                        if h < 70 | h > 220 & s > 50:
-                            holz[i, j] = 250
-
-                bright = cv.bitwise_not(bright)  # brightness invertieren
+                bright2 = cv.bitwise_not(bright)  # brightness invertieren
                 # brightness auf sättigung addieren
-                bright2 = cv.add(bright, sat)
+                bright2 = cv.add(bright2, sat)
                 # threshold anpassen für beides
 
                 m = np.average(bright2)  # Medianwert
@@ -738,7 +729,7 @@ class ImageChanger():
                     cv.imshow('Brightness', bright)
                     cv.imshow('Brightness2', bright2)
                     cv.imshow('T1', T1[1])
-                    cv.imshow('Holz', holz)
+
                     cv.waitKey(300 * self.holdtime)
                 retList.append(bright2)
 
@@ -1236,9 +1227,20 @@ class Dectree():
             true_negative, _ = tn_df.shape
             false_negative, _ = fn_df.shape
 
-            recall = true_positiv / (true_positiv+false_negative)
-            precision = true_positiv / (true_positiv+false_positiv)
-            f1score = 2 * (precision * recall) / (precision + recall)
+            try:
+                recall = true_positiv / (true_positiv+false_negative)
+            except:
+                recall = "---"
+
+            try:
+                precision = true_positiv / (true_positiv+false_positiv)
+            except:
+                precision = "---"
+
+            try:
+                f1score = 2 * (precision * recall) / (precision + recall)
+            except:
+                f1score = "---"
 
             keynumbers.append({"Label":uc, "recall":recall, "precision":precision, "f1score":f1score})
         
@@ -1331,10 +1333,21 @@ class Bayes():
             true_negative, _ = tn_df.shape
             false_negative, _ = fn_df.shape
 
-            recall = true_positiv / (true_positiv+false_negative)
-            precision = true_positiv / (true_positiv+false_positiv)
-            f1score = 2 * (precision * recall) / (precision + recall)
+            try:
+                recall = true_positiv / (true_positiv+false_negative)
+            except:
+                recall = "---"
 
+            try:
+                precision = true_positiv / (true_positiv+false_positiv)
+            except:
+                precision = "---"
+
+            try:
+                f1score = 2 * (precision * recall) / (precision + recall)
+            except:
+                f1score = "---"
+                
             keynumbers.append({"Label":uc, "recall":recall, "precision":precision, "f1score":f1score})
             
             
